@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Jinja2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #eef2f5;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .back-link {
+            margin-top: 20px;
+            display: inline-block;
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>FastAPI + Jinja2</h1>
+        <!-- FastAPI에서 전달한 message 매개변수 출력 -->
+        <p>{{ message }}</p>
+        <!-- 방법 B 적용: url_for 구문을 활용해 /api/ 경로로 자동 매핑 -->
+        <a href="{{ url_for('read_jinja_page') }}" class="back-link">← 처음으로 돌아가기</a>
+    </div>
+
+</body>
+</html>
