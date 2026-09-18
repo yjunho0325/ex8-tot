@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: fastapi-container
-        image: yjunho/nginx:latest
+        image: yjunho/nginx:48464bebd92f9927738a8011ba0d2d3aadb39e76
         ports:
         - containerPort: 8000
 ---
@@ -50,7 +50,7 @@ spec:
     spec:
       containers:
       - name: nginx-container
-        image: yjunho/nginx:latest
+        image: yjunho/nginx:48464bebd92f9927738a8011ba0d2d3aadb39e76
         ports:
         - containerPort: 80
 ---
