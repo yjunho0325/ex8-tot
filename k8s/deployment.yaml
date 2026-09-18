@@ -1,21 +1,56 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: fastapi-deployment
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fastapi-app-lb
+  template:
+    metadata:
+      labels:
+        app: fastapi-app-lb
+    spec:
+      containers:
+      - name: fastapi-container
+        image: yjunho/nginx:latest
+        ports:
+        - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi-svc
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app: fastapi-app-lb
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: nginx-deployment
   namespace: default
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: nginx-web-label
+      app: nginx-web-lb
   template:
     metadata:
       labels:
-        app: nginx-web-label
+        app: nginx-web-lb
     spec:
       containers:
       - name: nginx-container
-        image: yjunho/nginx:458784f6a325e0a3816e0a95b9b0b588945c62ba
+        image: yjunho/nginx:latest
         ports:
         - containerPort: 80
 ---
@@ -27,7 +62,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: nginx-web-label
+    app: nginx-web-lb
   ports:
   - protocol: TCP
     port: 80
@@ -68,6 +103,15 @@ metadata:
 spec: # 로드밸런서의 리스너에 대한 설정
   ingressClassName: alb
   rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: fastapi-svc
+                port:
+                  number: 8000
     - http:
         paths:
           - path: /

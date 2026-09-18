@@ -1,0 +1,47 @@
+name: GitOps Total CI/CD Pipeline
+on:
+  push:
+    branches: ["main"]
+jobs:
+  build-and-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # runs-on에 정의된 서버가 깃에 업로드된 파일(deployment.yaml) 수정(쓰기) 권한
+    steps:
+    - name: Source Code Check-Out # 깃에 push된 파일을 서버로 복사
+      uses: actions/checkout@v4
+    
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Docker image Build & Push
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./app/company/frontend/Dockerfile # Dockerfile의 경로 및 파일명
+        push: true
+        tags: yjunho/nginx:${{ github.sha }} # (중요) 이미지명 정의(태그 자동생성)
+        context: .
+        file: ./app/company/backend/Dockerfile # Dockerfile의 경로 및 파일명
+        push: true
+        tags: yjunho/fastapi:${{ github.sha }} # (중요) 이미지명 정의(태그 자동생성)
+
+    - name: 쿠버네티스 파일의 이미지 태그 갱신 및 Git Push
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        sed -i 's|image: yjunho/nginx:.*|image: yjunho/nginx:${{ github.sha }}|g' ./k8s/deployment.yaml
+        sed -i 's|image: yjunho/fastapi:.*|image: yjunho/fastapi:${{ github.sha }}|g' ./k8s/deployment.yaml
+        git add ./k8s/deployment.yaml
+        git commit -m "Deployment file tag Update(${{ github.sha }})"
+        git push
+
+    # - name: AWS 자격 증명 설정
+    #   uses: aws-actions/configure-aws-credentials@v4
+    #   with:
+    #     aws-access-key-id: ${{ ecrets.AWS_ACCESS_KEY }}
+    #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #     aws-region: ${{ secrets.AWS_REGION }}
