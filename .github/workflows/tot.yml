@@ -17,17 +17,21 @@ jobs:
         username: ${{ secrets.DOCKER_USER }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Docker image Build & Push
+    - name: Frontend Docker image Build & Push
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./app/company/frontend/Dockerfile # Dockerfile의 경로 및 파일명
+        file: ./app/company/frontend/Dockerfile
         push: true
-        tags: yjunho/nginx:${{ github.sha }} # (중요) 이미지명 정의(태그 자동생성)
+        tags: yjunho/nginx:${{ github.sha }}
+
+    - name: Backend Docker image Build & Push
+      uses: docker/build-push-action@v5
+      with:
         context: .
-        file: ./app/company/backend/Dockerfile # Dockerfile의 경로 및 파일명
+        file: ./app/company/backend/Dockerfile
         push: true
-        tags: yjunho/fastapi:${{ github.sha }} # (중요) 이미지명 정의(태그 자동생성)
+        tags: yjunho/fastapi:${{ github.sha }}
 
     - name: 쿠버네티스 파일의 이미지 태그 갱신 및 Git Push
       run: |
